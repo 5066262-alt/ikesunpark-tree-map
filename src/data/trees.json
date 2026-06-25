@@ -1,0 +1,38 @@
+[
+  {
+    "id": "tree-1",
+    "species": "ソメイヨシノ",
+    "area": "MAP",
+    "location": {
+      "x": 400,
+      "y": 600
+    },
+    "height": 12.5,
+    "girth": 150,
+    "photoUrl": "https://images.unsplash.com/photo-1552089123-2d26228fc0d4?auto=format&fit=crop&q=80&w=400&h=300",
+    "co2Sequestration": 15.2,
+    "co2EquivalentNow": 16.5,
+    "avoidedMiles": 40.8,
+    "createdDate": "2023-04-01",
+    "lastSurveyDate": "2023-04-01",
+    "notes": "春には満開の桜が楽しめます。校舎のすぐそばにあります。"
+  },
+  {
+    "id": "tree-2",
+    "species": "イチョウ",
+    "area": "MAP",
+    "location": {
+      "x": 200,
+      "y": 800
+    },
+    "height": 18,
+    "girth": 210,
+    "photoUrl": "https://images.unsplash.com/photo-1507369512168-9b7ee6cfce86?auto=format&fit=crop&q=80&w=400&h=300",
+    "co2Sequestration": 22.5,
+    "co2EquivalentNow": 24.3,
+    "avoidedMiles": 60.1,
+    "createdDate": "2023-11-15",
+    "lastSurveyDate": "2023-11-15",
+    "notes": "秋には見事な黄葉が見られます。キャンパスのシンボルツリーの一つです。"
+  }
+]
