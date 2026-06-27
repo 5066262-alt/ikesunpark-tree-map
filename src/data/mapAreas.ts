@@ -7,5 +7,5 @@ export interface MapArea {
 }
 
 export const MAP_AREAS: Record<string, MapArea> = {
-  MAP: { id: 'MAP', name: 'N.IKE_TreeMap', width: 842, height: 1191, url: '/maps/N.IKE_TreeMap.png' },
+  MAP: { id: 'MAP', name: 'N.IKE_TreeMap', width: 1024, height: 791, url: '/maps/N.IKE_TreeMap.png' },
 };

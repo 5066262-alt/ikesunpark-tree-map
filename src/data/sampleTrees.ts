@@ -20,7 +20,7 @@ export const SAMPLE_TREES: TreeData[] = [
     id: "tree-2",
     species: "イチョウ",
     area: "MAP",
-    location: { x: 200, y: 800 },
+    location: { x: 200, y: 500 },
     height: 18.0,
     girth: 210,
     photoUrl: "https://images.unsplash.com/photo-1507369512168-9b7ee6cfce86?auto=format&fit=crop&q=80&w=400&h=300",
