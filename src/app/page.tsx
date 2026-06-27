@@ -192,16 +192,17 @@ export default function Home() {
               </button>
             )}
 
-            <button 
-              onClick={isAddMode ? handleCancelForm : handleAddClick}
-              className={`${
-                isAddMode 
-                  ? 'bg-gray-800 hover:bg-gray-900 shadow-gray-800/30 rotate-45' 
-                  : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
-              } text-white shadow-lg w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 z-[401] shrink-0`}
-            >
-              <Plus size={24} />
-            </button>
+<button 
+  onClick={isAddMode ? handleCancelForm : handleAddClick}
+  className={`fixed bottom-6 right-6 z-[500] text-white shadow-2xl w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 transform active:scale-95 border border-white/20 ${
+    isAddMode 
+      ? 'bg-red-500 hover:bg-red-600 shadow-red-500/30 rotate-45' 
+      : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
+  }`}
+  title={isAddMode ? "キャンセル" : "新しい樹木を追加"}
+>
+  <Plus size={28} />
+</button>
           </div>
         </div>
 
