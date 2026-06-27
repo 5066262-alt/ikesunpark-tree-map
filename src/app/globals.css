@@ -33,3 +33,10 @@ body {
 
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Fix Leaflet map image overlay and tile distortion caused by Tailwind preflight */
+.leaflet-container img {
+  max-width: none !important;
+  max-height: none !important;
+}
+
