@@ -9,7 +9,7 @@ import SearchBar, { SortType, ViewMode } from '../components/Controls/SearchBar'
 import TreeListView from '../components/TreeList/TreeListView';
 import { TreeData } from '../types';
 import { MAP_AREAS } from '../data/mapAreas';
-import { Plus, Trees, MapPin, ChevronDown } from 'lucide-react';
+import { Plus, Trees, MapPin, Search, X } from 'lucide-react';
 
 export default function Home() {
   const { trees, isLoaded, saveTree, deleteTree } = useTrees();
@@ -30,8 +30,8 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortType>('default');
   const [viewMode, setViewMode] = useState<ViewMode>('map');
 
-  // エリア選択メニューの開閉状態
-  const [isAreaMenuOpen, setIsAreaMenuOpen] = useState(false);
+  // 検索バーの開閉状態（地図を広く見せるための追加機能）
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // フィルタリング＆ソート処理
   const filteredTrees = useMemo(() => {
@@ -104,7 +104,7 @@ export default function Home() {
       const newHistory = [...(editingTree.history || []), historyEntry];
       data.history = newHistory;
       data.id = editingTree.id;
-      data.createdDate = editingTree.createdDate; // データ追加日を引き継ぐ
+      data.createdDate = editingTree.createdDate;
     }
 
     saveTree(data);
@@ -156,7 +156,8 @@ export default function Home() {
   };
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-gray-100 font-sans">
+    // 縦横比崩れ対策：強制h-screenを解除し、背景で満たす形に修正
+    <main className="relative w-full min-h-screen bg-gray-100 font-sans flex items-center justify-center overflow-x-hidden">
       
       {/* Header (Floating) */}
       <div className="absolute top-0 left-0 right-0 z-[400] p-4 md:p-6 pointer-events-none flex flex-col gap-4">
@@ -175,21 +176,36 @@ export default function Home() {
             </div>
           </div>
           
-          <button 
-            onClick={isAddMode ? handleCancelForm : handleAddClick}
-            className={`${
-              isAddMode 
-                ? 'bg-gray-800 hover:bg-gray-900 shadow-gray-800/30 rotate-45' 
-                : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
-            } text-white shadow-lg w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 pointer-events-auto active:scale-95 z-[401] shrink-0`}
-          >
-            <Plus size={24} />
-          </button>
+          {/* 右上: アクションボタン（検索と追加） */}
+          <div className="flex gap-2 pointer-events-auto">
+            {/* 検索窓を開閉するトグルボタン */}
+            {!isAddMode && (
+              <button 
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className={`${
+                  isSearchOpen ? 'bg-gray-800 shadow-gray-800/30' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
+                } text-white shadow-lg w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 z-[401]`}
+              >
+                {isSearchOpen ? <X size={20} className="text-white" /> : <Search size={20} className="text-gray-700" />}
+              </button>
+            )}
+
+            <button 
+              onClick={isAddMode ? handleCancelForm : handleAddClick}
+              className={`${
+                isAddMode 
+                  ? 'bg-gray-800 hover:bg-gray-900 shadow-gray-800/30 rotate-45' 
+                  : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
+              } text-white shadow-lg w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 z-[401] shrink-0`}
+            >
+              <Plus size={24} />
+            </button>
+          </div>
         </div>
 
-        {/* 検索・フィルタバー */}
-        {!isAddMode && (
-          <div className="w-full flex justify-center mt-[-10px]">
+        {/* 検索・フィルタバー（開閉状態に合わせて表示） */}
+        {!isAddMode && isSearchOpen && (
+          <div className="w-full flex justify-center mt-[-10px] animate-in fade-in slide-in-from-top-2 duration-200">
             <SearchBar 
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -213,7 +229,7 @@ export default function Home() {
       )}
 
       {/* View Container */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
         {viewMode === 'map' ? (
           <TreeMap 
             trees={filteredTrees} 
