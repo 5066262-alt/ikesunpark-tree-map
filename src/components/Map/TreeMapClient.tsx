@@ -28,7 +28,6 @@ function MapEvents({ isAddMode, onMapClick }: { isAddMode?: boolean, onMapClick?
   useMapEvents({
     click(e) {
       if (isAddMode && onMapClick) {
-        // L.CRS.Simple maps (lat, lng) to (y, x)
         onMapClick(e.latlng.lng, e.latlng.lat);
       }
     },
@@ -43,6 +42,8 @@ function MapUpdater({ area }: { area: MapArea }) {
     const bounds: L.LatLngBoundsExpression = [[0, 0], [area.height, area.width]];
     map.setMaxBounds(bounds);
     map.fitBounds(bounds);
+    // 画面サイズに合わせて地図がはみ出さないように自動調整
+    map.invalidateSize();
   }, [area, map]);
   return null;
 }
@@ -57,41 +58,50 @@ export default function TreeMapClient({ trees, currentArea, onSelectTree, isAddM
   if (!mounted) return <div className="h-full w-full bg-gray-100" />;
 
   const bounds: L.LatLngBoundsExpression = [[0, 0], [currentArea.height, currentArea.width]];
-
-  // 現在のエリアに属する樹木のみをフィルタリング
   const areaTrees = trees.filter(tree => tree.area === currentArea.id);
 
+  // 地図の縦横比（アスペクト比）を計算して、無理な引き伸ばしを防ぐ大元の箱
   return (
-    <div className={`h-full w-full ${isAddMode ? 'cursor-crosshair' : ''}`}>
-      <MapContainer
-        crs={L.CRS.Simple}
-        bounds={bounds}
-        maxBounds={bounds}
-        maxBoundsViscosity={1.0}
-        minZoom={-2}
-        maxZoom={2}
-        zoomControl={false} // UIをすっきりさせるためズームコントロールは非表示か、必要に応じてtrueに
-        className="h-full w-full bg-[#f0f0f0]" // 画像の背景色
+    <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center">
+      <div 
+        className={`w-full h-full ${isAddMode ? 'cursor-crosshair' : ''}`}
+        style={{
+          maxHeight: '100vh',
+          maxWidth: '100vw',
+          // 画像本来の比率（幅 / 高さ）を保つための魔法の計算
+          aspectRatio: `${currentArea.width} / ${currentArea.height}`,
+        }}
       >
-        <MapUpdater area={currentArea} />
-        <MapEvents isAddMode={isAddMode} onMapClick={onMapClick} />
-        
-        <ImageOverlay
-          url={currentArea.url}
+        <MapContainer
+          crs={L.CRS.Simple}
           bounds={bounds}
-        />
-
-        {areaTrees.map((tree) => (
-          <Marker 
-            key={tree.id} 
-            position={[tree.location.y, tree.location.x]} // Leaflet position is [lat(y), lng(x)]
-            icon={customIcon}
-            eventHandlers={{
-              click: () => onSelectTree(tree),
-            }}
+          maxBounds={bounds}
+          maxBoundsViscosity={1.0}
+          minZoom={-2}
+          maxZoom={2}
+          zoomControl={false}
+          className="h-full w-full bg-[#e5e7eb]"
+        >
+          <MapUpdater area={currentArea} />
+          <MapEvents isAddMode={isAddMode} onMapClick={onMapClick} />
+          
+          <ImageOverlay
+            url={currentArea.url}
+            bounds={bounds}
           />
-        ))}
-      </MapContainer>
+
+          {areaTrees.map((tree) => (
+            <Marker 
+              key={tree.id} 
+              position={[tree.location.y, tree.location.x]}
+              icon={customIcon}
+              eventHandlers={{
+                click: () => onSelectTree(tree),
+              }}
+            />
+          ))}
+        </MapContainer>
+      </div>
     </div>
   );
 }
