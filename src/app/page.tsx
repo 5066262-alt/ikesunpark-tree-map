@@ -157,17 +157,16 @@ export default function Home() {
     setSelectedTree(null);
   };
 
-  return (
-    // 縦横比崩れ対策：強制h-screenを解除し、背景で満たす形に修正
-    <main className="relative w-full min-h-screen bg-gray-100 font-sans flex items-center justify-center overflow-x-hidden">
+return (
+    <main className="relative w-full h-screen bg-gray-100 font-sans flex items-center justify-center overflow-hidden select-none">
       
-      {/* Header (Floating) */}
-      <div className="absolute top-0 left-0 right-0 z-[400] p-4 md:p-6 pointer-events-none flex flex-col gap-4">
-        <div className="flex justify-between items-start">
+      {/* 💡 修正：iPadの横向きでも絶対に見切れない「固定ヘッダー」 */}
+      <div className="fixed top-0 left-0 right-0 z-[400] p-4 md:p-6 pointer-events-none flex flex-col gap-4">
+        <div className="flex justify-between items-start w-full">
           
-          {/* 左上: タイトル */}
-          <div className="flex flex-col items-start gap-2">
-            <div className="bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-lg border border-white/50 pointer-events-auto flex items-center gap-3">
+          {/* 左上: タイトル（常に見えるように固定） */}
+          <div className="flex flex-col items-start gap-2 pointer-events-auto">
+            <div className="bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-lg border border-white/50 flex items-center gap-3">
               <div className="bg-green-100 p-1.5 rounded-xl text-green-700">
                 <Trees size={20} />
               </div>
@@ -178,9 +177,8 @@ export default function Home() {
             </div>
           </div>
           
-          {/* 右上: アクションボタン（検索と追加） */}
+          {/* 右上: 検索窓を開閉するトグルボタン専用エリア */}
           <div className="flex gap-2 pointer-events-auto">
-            {/* 検索窓を開閉するトグルボタン */}
             {!isAddMode && (
               <button 
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -191,24 +189,12 @@ export default function Home() {
                 {isSearchOpen ? <X size={20} className="text-white" /> : <Search size={20} className="text-gray-700" />}
               </button>
             )}
-
-<button 
-  onClick={isAddMode ? handleCancelForm : handleAddClick}
-  className={`fixed bottom-6 right-6 z-[500] text-white shadow-2xl w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 transform active:scale-95 border border-white/20 ${
-    isAddMode 
-      ? 'bg-red-500 hover:bg-red-600 shadow-red-500/30 rotate-45' 
-      : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
-  }`}
-  title={isAddMode ? "キャンセル" : "新しい樹木を追加"}
->
-  <Plus size={28} />
-</button>
           </div>
         </div>
 
         {/* 検索・フィルタバー（開閉状態に合わせて表示） */}
         {!isAddMode && isSearchOpen && (
-          <div className="w-full flex justify-center mt-[-10px] animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="w-full flex justify-center mt-[-6px] animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
             <SearchBar 
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -223,7 +209,7 @@ export default function Home() {
 
       {/* 追加モード時の案内バナー */}
       {isAddMode && !formLocation && !editingTree && (
-        <div className="absolute top-36 left-1/2 -translate-x-1/2 z-[400] pointer-events-none animate-in fade-in slide-in-from-top-4 duration-300 w-full max-w-sm px-4">
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[400] pointer-events-none animate-in fade-in slide-in-from-top-4 duration-300 w-full max-w-sm px-4">
           <div className="bg-gray-800/90 backdrop-blur-sm text-white px-5 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 font-medium text-sm">
             <MapPin size={18} className="animate-bounce shrink-0" />
             地図上の追加したい場所をクリック
@@ -248,6 +234,19 @@ export default function Home() {
           />
         )}
       </div>
+
+      {/* 💡 修正：Leafletの文字を踏まないように少し上に避難させた「右下のプラスボタン」 */}
+      <button 
+        onClick={isAddMode ? handleCancelForm : handleAddClick}
+        className={`fixed bottom-12 right-6 z-[500] text-white shadow-2xl w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 transform active:scale-95 border border-white/20 ${
+          isAddMode 
+            ? 'bg-red-500 hover:bg-red-600 shadow-red-500/30 rotate-45' 
+            : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
+        }`}
+        title={isAddMode ? "キャンセル" : "新しい樹木を追加"}
+      >
+        <Plus size={28} />
+      </button>
 
       {/* フォーム (Bottom Sheet / Modal) */}
       <div className={`absolute bottom-0 left-0 right-0 z-[500] md:bottom-auto md:top-24 md:right-6 md:left-auto md:w-[450px] transition-transform duration-500 ease-out ${
