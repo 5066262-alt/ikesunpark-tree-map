@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { X, Upload, Leaf, Ruler, Save, Globe, ExternalLink } from 'lucide-react';
+import { X, Upload, Leaf, Ruler, Save, Globe, ExternalLink, HeartPulse, Sun } from 'lucide-react';
 import { TreeData } from '../../types';
 
 interface TreeFormProps {
@@ -22,6 +22,10 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
   const [co2EquivalentNow, setCo2EquivalentNow] = useState<string>(initialData?.co2EquivalentNow?.toString() || '');
   const [avoidedMiles, setAvoidedMiles] = useState<string>(initialData?.avoidedMiles?.toString() || '');
   
+  // 💡 追加項目：樹木の状態と日当たりの状態管理
+  const [condition, setCondition] = useState<string>(isHistoryMode ? 'Excellent' : (initialData?.condition || 'Excellent'));
+  const [sunlight, setSunlight] = useState<string>(isHistoryMode ? 'Full' : (initialData?.sunlight || 'Full'));
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +35,6 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
       reader.onloadend = () => {
         const img = new Image();
         img.onload = () => {
-          // 画像を縮小する (最大幅/高さを800pxに制限)
           const MAX_SIZE = 800;
           let width = img.width;
           let height = img.height;
@@ -51,11 +54,9 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            // JPEGとして品質0.7で圧縮してBase64化
             const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
             setPhotoUrl(compressedBase64);
           } else {
-            // Canvasが使えない場合のフォールバック
             setPhotoUrl(reader.result as string);
           }
         };
@@ -68,7 +69,6 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 簡易的な環境価値の自動計算（モック）
     const numHeight = parseFloat(height) || 0;
     const numGirth = parseFloat(girth) || 0;
     const co2 = Number((numGirth * 0.15 + numHeight * 0.5).toFixed(1));
@@ -84,12 +84,14 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
       location,
       height: numHeight,
       girth: numGirth,
-      photoUrl: photoUrl || 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=400&h=300', // デフォルト画像
+      photoUrl: photoUrl || 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=400&h=300',
       co2Sequestration: initialData?.co2Sequestration || co2,
       co2EquivalentNow: numCo2Eq,
       avoidedMiles: numMiles,
+      condition, // 💡 追加：選択された状態を保存
+      sunlight,  // 💡 追加：選択された日当たりを保存
       createdDate: initialData?.createdDate || todayStr,
-      lastSurveyDate: todayStr, // 最新の編集・記録日を最終調査日に設定
+      lastSurveyDate: todayStr,
       notes,
     };
 
@@ -151,6 +153,42 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
               placeholder="例: ソメイヨシノ"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
             />
+          </div>
+
+          {/* 💡 追加：樹木の状態 ＆ 日当たり（2列レイアウト） */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
+                <HeartPulse size={16} className="text-red-500" /> Tree Condition
+              </label>
+              <select
+                value={condition}
+                onChange={(e) => setCondition(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white font-medium text-gray-700"
+              >
+                <option value="Excellent">Excellent</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Poor">Poor</option>
+                <option value="Critical">Critical</option>
+                <option value="Dying">Dying</option>
+                <option value="Dead">Dead</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
+                <Sun size={16} className="text-amber-500" /> Sunlight
+              </label>
+              <select
+                value={sunlight}
+                onChange={(e) => setSunlight(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white font-medium text-gray-700"
+              >
+                <option value="Full">Full</option>
+                <option value="Partial">Partial</option>
+                <option value="Shade">Shade</option>
+              </select>
+            </div>
           </div>
 
           {/* サイズ */}
@@ -252,7 +290,7 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
             ></textarea>
           </div>
           
-          <div className="h-6"></div> {/* Bottom padding */}
+          <div className="h-6"></div>
         </form>
       </div>
 

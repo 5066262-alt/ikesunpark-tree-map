@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Leaf, Calendar, Ruler, NotebookText, Edit2, Trash2, Camera, History, Car, Globe } from 'lucide-react';
+import { X, Leaf, Calendar, Ruler, NotebookText, Edit2, Trash2, Camera, History, Car, Globe, HeartPulse, Sun } from 'lucide-react';
 import { TreeData } from '../../types';
 
 interface TreeCardProps {
@@ -30,6 +30,8 @@ export default function TreeCard({ tree, onClose, onEdit, onDelete, onAddRecord 
       co2Sequestration: tree.co2Sequestration,
       co2EquivalentNow: tree.co2EquivalentNow,
       avoidedMiles: tree.avoidedMiles,
+      condition: tree.condition || 'Excellent', // 💡 追加：現在の状態
+      sunlight: tree.sunlight || 'Full',        // 💡 追加：現在の日当たり
       isCurrent: true
     },
     ...(tree.history || []).map(h => ({
@@ -41,9 +43,35 @@ export default function TreeCard({ tree, onClose, onEdit, onDelete, onAddRecord 
       co2Sequestration: h.co2Sequestration,
       co2EquivalentNow: h.co2EquivalentNow,
       avoidedMiles: h.avoidedMiles,
+      condition: h.condition || 'Excellent', // 💡 追加：過去の状態
+      sunlight: h.sunlight || 'Full',        // 💡 追加：過去の日当たり
       isCurrent: false
     })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   ];
+
+  // 💡 追加：Conditionに合わせた色を決定するヘルパー関数
+  const getConditionColor = (cond?: string) => {
+    switch (cond) {
+      case 'Excellent': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'Good': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Fair': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'Poor': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'Critical': return 'bg-rose-100 text-rose-800 border-rose-200';
+      case 'Dying': return 'bg-red-100 text-red-800 border-red-200';
+      case 'Dead': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  // 💡 追加：Sunlightに合わせた色を決定するヘルパー関数
+  const getSunlightColor = (sun?: string) => {
+    switch (sun) {
+      case 'Full': return 'bg-orange-50 text-orange-700 border-orange-100';
+      case 'Partial': return 'bg-yellow-50 text-yellow-700 border-yellow-100';
+      case 'Shade': return 'bg-blue-50 text-blue-700 border-blue-100';
+      default: return 'bg-gray-50 text-gray-700 border-gray-100';
+    }
+  };
 
   return (
     <div className="bg-white/95 backdrop-blur-md rounded-t-3xl md:rounded-2xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] md:shadow-xl overflow-hidden flex flex-col h-[85vh] md:h-auto max-h-[850px] border border-white/40">
@@ -114,6 +142,18 @@ export default function TreeCard({ tree, onClose, onEdit, onDelete, onAddRecord 
       {/* Content scroll area */}
       <div className="flex-1 overflow-y-auto p-5 space-y-6">
         
+        {/* 💡 追加項目：Tree Condition と Sunlight のバッジ表示 */}
+        <div className="flex gap-2">
+          <div className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border ${getConditionColor(tree.condition)} shadow-sm flex-1 justify-center`}>
+            <HeartPulse size={14} />
+            <span>Condition: {tree.condition || 'Excellent'}</span>
+          </div>
+          <div className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border ${getSunlightColor(tree.sunlight)} shadow-sm flex-1 justify-center`}>
+            <Sun size={14} />
+            <span>Sunlight: {tree.sunlight || 'Full'}</span>
+          </div>
+        </div>
+
         {/* Basic Stats */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-green-50/80 rounded-xl p-4 flex flex-col items-center justify-center border border-green-100">
@@ -213,23 +253,38 @@ export default function TreeCard({ tree, onClose, onEdit, onDelete, onAddRecord 
             </h3>
             <div className="flex overflow-x-auto pb-4 gap-4 snap-x hide-scrollbar -mx-5 px-5">
               {timeline.map((item) => (
-                <div key={item.id} className="shrink-0 w-40 snap-start bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm relative">
+                <div key={item.id} className="shrink-0 w-44 snap-start bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm relative flex flex-col justify-between">
                   {item.isCurrent && (
                     <div className="absolute top-1 right-1 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow-sm">
                       最新
                     </div>
                   )}
-                  <div className="h-28 w-full relative">
-                    <img src={item.photoUrl} alt={item.date} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-3">
-                    <p className="text-xs text-gray-500 font-bold mb-1 flex items-center gap-1">
-                      <Calendar size={10} /> {item.date}
-                    </p>
-                    <div className="flex justify-between text-[11px] text-gray-700 mb-1.5 font-medium">
-                      <span>高: <span className="font-bold">{item.height}</span>m</span>
-                      <span>周: <span className="font-bold">{item.girth}</span>cm</span>
+                  <div>
+                    <div className="h-28 w-full relative">
+                      <img src={item.photoUrl} alt={item.date} className="w-full h-full object-cover" />
                     </div>
+                    <div className="p-3 space-y-1.5">
+                      <p className="text-xs text-gray-500 font-bold flex items-center gap-1">
+                        <Calendar size={10} /> {item.date}
+                      </p>
+                      <div className="flex justify-between text-[11px] text-gray-700 font-medium">
+                        <span>高: <span className="font-bold">{item.height}</span>m</span>
+                        <span>周: <span className="font-bold">{item.girth}</span>cm</span>
+                      </div>
+                      
+                      {/* 💡 追加：タイムライン内の各カードに当時のConditionとSunlightを極小表示 */}
+                      <div className="grid grid-cols-2 gap-1 text-[9px] font-bold">
+                        <div className={`px-1 py-0.5 rounded border text-center truncate ${getConditionColor(item.condition)}`}>
+                          {item.condition}
+                        </div>
+                        <div className={`px-1 py-0.5 rounded border text-center truncate ${getSunlightColor(item.sunlight)}`}>
+                          {item.sunlight}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 pt-0">
                     <div className="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100/60 flex items-center justify-between gap-0.5">
                       <span className="flex items-center gap-0.5 shrink-0"><Leaf size={8} /> CO2:</span>
                       <span className="truncate">
