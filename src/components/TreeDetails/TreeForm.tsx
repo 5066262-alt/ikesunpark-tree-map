@@ -22,7 +22,6 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
   const [co2EquivalentNow, setCo2EquivalentNow] = useState<string>(initialData?.co2EquivalentNow?.toString() || '');
   const [avoidedMiles, setAvoidedMiles] = useState<string>(initialData?.avoidedMiles?.toString() || '');
   
-  // 💡 追加項目：樹木の状態と日当たりの状態管理
   const [condition, setCondition] = useState<string>(isHistoryMode ? 'Excellent' : (initialData?.condition || 'Excellent'));
   const [sunlight, setSunlight] = useState<string>(isHistoryMode ? 'Full' : (initialData?.sunlight || 'Full'));
   
@@ -88,8 +87,8 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
       co2Sequestration: initialData?.co2Sequestration || co2,
       co2EquivalentNow: numCo2Eq,
       avoidedMiles: numMiles,
-      condition, // 💡 追加：選択された状態を保存
-      sunlight,  // 💡 追加：選択された日当たりを保存
+      condition,
+      sunlight,
       createdDate: initialData?.createdDate || todayStr,
       lastSurveyDate: todayStr,
       notes,
@@ -99,35 +98,40 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-t-3xl md:rounded-2xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] md:shadow-xl overflow-hidden flex flex-col h-[85vh] md:h-auto max-h-[800px] border border-white/40">
-      <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white">
-        <h2 className="text-xl font-bold text-gray-800">
+    /* 💡 修正：全体の高さを「画面の高さの最大70%」に制限し、はみ出さないように固定 */
+    <div className="bg-white/95 backdrop-blur-md rounded-t-3xl md:rounded-2xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] md:shadow-xl overflow-hidden flex flex-col h-[70vh] md:h-[650px] border border-white/40">
+      
+      {/* 固定ヘッダー（タイトル） */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white shrink-0">
+        <h2 className="text-lg font-bold text-gray-800">
           {isHistoryMode ? '成長記録を追加' : (initialData ? '樹木データの編集' : '新しい樹木を登録')}
         </h2>
         <button 
+          type="button"
           onClick={onCancel}
           className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-full transition-colors"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5">
-        <form id="tree-form" onSubmit={handleSubmit} className="space-y-6">
+      {/* 💡 修正：入力フォーム部分だけをスクロール可能にする (`flex-1 overflow-y-auto`) */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-5 bg-white">
+        <form id="tree-form" onSubmit={handleSubmit} className="space-y-5">
           
           {/* 写真アップロード */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">写真</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5">写真</label>
             <div 
-              className="border-2 border-dashed border-gray-300 rounded-xl h-40 flex flex-col items-center justify-center bg-gray-50 cursor-pointer overflow-hidden relative hover:bg-gray-100 transition-colors"
+              className="border-2 border-dashed border-gray-300 rounded-xl h-32 flex flex-col items-center justify-center bg-gray-50 cursor-pointer overflow-hidden relative hover:bg-gray-100 transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               {photoUrl ? (
                 <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
               ) : (
                 <>
-                  <Upload className="text-gray-400 mb-2" size={28} />
-                  <span className="text-sm text-gray-500 font-medium">タップして写真をアップロード</span>
+                  <Upload className="text-gray-400 mb-1" size={24} />
+                  <span className="text-xs text-gray-500 font-medium">タップして写真をアップロード</span>
                 </>
               )}
             </div>
@@ -142,8 +146,8 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
 
           {/* 樹種名 */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
-              <Leaf size={16} className="text-green-600" /> 樹種名 <span className="text-red-500">*</span>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1">
+              <Leaf size={14} className="text-green-600" /> 樹種名 <span className="text-red-500">*</span>
             </label>
             <input 
               type="text" 
@@ -151,20 +155,20 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
               value={species}
               onChange={(e) => setSpecies(e.target.value)}
               placeholder="例: ソメイヨシノ"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+              className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
             />
           </div>
 
-          {/* 💡 追加：樹木の状態 ＆ 日当たり（2列レイアウト） */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Tree Condition と Sunlight */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
-                <HeartPulse size={16} className="text-red-500" /> Tree Condition
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1">
+                <HeartPulse size={14} className="text-red-500" /> Tree Condition
               </label>
               <select
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white font-medium text-gray-700"
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white font-medium text-gray-700"
               >
                 <option value="Excellent">Excellent</option>
                 <option value="Good">Good</option>
@@ -176,13 +180,13 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
               </select>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
-                <Sun size={16} className="text-amber-500" /> Sunlight
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1">
+                <Sun size={14} className="text-amber-500" /> Sunlight
               </label>
               <select
                 value={sunlight}
                 onChange={(e) => setSunlight(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white font-medium text-gray-700"
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white font-medium text-gray-700"
               >
                 <option value="Full">Full</option>
                 <option value="Partial">Partial</option>
@@ -192,10 +196,10 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
           </div>
 
           {/* サイズ */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
-                <Ruler size={16} className="text-green-600" /> 樹高 (m)
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1">
+                <Ruler size={14} className="text-green-600" /> 樹高 (m)
               </label>
               <input 
                 type="number" 
@@ -204,12 +208,12 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 placeholder="例: 5.5"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
-                <div className="w-4 h-4 rounded-full border-2 border-green-600 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-green-600 rounded-full"></div></div> 幹周 (cm)
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1">
+                <div className="w-3.5 h-3.5 rounded-full border-2 border-green-600 flex items-center justify-center"><div className="w-1 h-1 bg-green-600 rounded-full"></div></div> 幹周 (cm)
               </label>
               <input 
                 type="number" 
@@ -218,33 +222,30 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
                 value={girth}
                 onChange={(e) => setGirth(e.target.value)}
                 placeholder="例: 120"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
               />
             </div>
           </div>
 
           {/* i-Tree MyTree 計算結果 */}
-          <div className="bg-emerald-50/50 border border-emerald-100/60 rounded-2xl p-4 space-y-4">
+          <div className="bg-emerald-50/50 border border-emerald-100/60 rounded-2xl p-3.5 space-y-3">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-emerald-800 flex items-center gap-1.5">
-                <Globe size={16} className="text-emerald-600" /> i-Tree MyTree 計算結果 (任意)
+              <h3 className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+                <Globe size={14} className="text-emerald-600" /> i-Tree MyTree 計算結果
               </h3>
               <a 
                 href="https://mytree.itreetools.org/#/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-0.5 transition-colors"
+                className="text-[11px] text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-0.5 transition-colors"
               >
-                MyTreeで計算する <ExternalLink size={12} />
+                MyTreeで計算する <ExternalLink size={10} />
               </a>
             </div>
-            <p className="text-xs text-emerald-700/80 leading-relaxed">
-              IKE・SUNパークの位置情報と樹高・幹周をもとにMyTreeサイトで算出した環境価値を入力できます。
-            </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
-                  CO2 Equivalent (Now) (kg)
+                <label className="block text-[10px] font-bold text-gray-700 mb-1">
+                  CO2 (Now) (kg)
                 </label>
                 <input 
                   type="number" 
@@ -253,12 +254,12 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
                   value={co2EquivalentNow}
                   onChange={(e) => setCo2EquivalentNow(e.target.value)}
                   placeholder="例: 15.2"
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="w-full px-2.5 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
-                  回避走行マイル (1年後) (miles)
+                <label className="block text-[10px] font-bold text-gray-700 mb-1">
+                  回避走行マイル (miles)
                 </label>
                 <input 
                   type="number" 
@@ -267,47 +268,42 @@ export default function TreeForm({ initialData, area, location, isHistoryMode, o
                   value={avoidedMiles}
                   onChange={(e) => setAvoidedMiles(e.target.value)}
                   placeholder="例: 38.5"
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="w-full px-2.5 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                 />
-                {avoidedMiles && !isNaN(parseFloat(avoidedMiles)) && (
-                  <span className="text-[10px] text-emerald-700 block mt-1.5 font-semibold bg-emerald-50 border border-emerald-100 p-1 rounded-md">
-                    → 約 {(parseFloat(avoidedMiles) * 1.60934).toFixed(2)} km に自動換算
-                  </span>
-                )}
               </div>
             </div>
           </div>
 
           {/* メモ */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">メモ・特徴</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5">メモ・特徴</label>
             <textarea 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="健康状態や特徴的な点を記録..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white resize-none"
+              rows={2}
+              className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white resize-none"
             ></textarea>
           </div>
           
-          <div className="h-6"></div>
         </form>
       </div>
 
-      <div className="p-5 border-t border-gray-100 bg-gray-50 flex gap-3">
+      {/* 💡 修正：ボトムボタンエリア（完全に最下部に固定し、絶対に見切れないようにする） */}
+      <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-3 shrink-0">
         <button 
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3.5 px-4 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
+          className="flex-1 py-3 px-4 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl text-sm shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
         >
           キャンセル
         </button>
         <button 
           type="submit"
           form="tree-form"
-          className="flex-1 py-3.5 px-4 bg-green-600 text-white font-bold rounded-xl shadow-md hover:bg-green-700 shadow-green-600/20 active:scale-95 transition-all flex justify-center items-center gap-2"
+          className="flex-1 py-3 px-4 bg-green-600 text-white font-bold rounded-xl text-sm shadow-md hover:bg-green-700 shadow-green-600/20 active:scale-95 transition-all flex justify-center items-center gap-2"
         >
-          <Save size={18} /> {isHistoryMode ? '記録を追加する' : (initialData ? '更新する' : '登録する')}
+          <Save size={16} /> {isHistoryMode ? '記録を追加' : (initialData ? '更新する' : '登録する')}
         </button>
       </div>
     </div>
