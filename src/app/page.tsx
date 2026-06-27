@@ -89,7 +89,7 @@ export default function Home() {
   // フォームで保存した時
   const handleSaveTree = (data: TreeData) => {
     if (isHistoryMode && editingTree) {
-      const historyEntry = {
+  const historyEntry = {
         id: `hist-${Date.now()}`,
         date: editingTree.lastSurveyDate,
         photoUrl: editingTree.photoUrl,
@@ -98,6 +98,8 @@ export default function Home() {
         co2Sequestration: editingTree.co2Sequestration,
         co2EquivalentNow: editingTree.co2EquivalentNow,
         avoidedMiles: editingTree.avoidedMiles,
+        condition: editingTree.condition || 'Excellent', // 💡 追加
+        sunlight: editingTree.sunlight || 'Full',       // 💡 追加
         notes: editingTree.notes,
       };
       
